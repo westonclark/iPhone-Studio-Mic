@@ -46,8 +46,8 @@ struct AudioRoutingView: View {
                                     .font(.title)
 
                 
-                AudioMeter(level: $audioHandler.audioLevel) // Pass the binding to AudioMeter
-                    .padding(25)
+//                AudioMeter(level: $audioHandler.audioLevel) // Pass the binding to AudioMeter
+//                    .padding(25)
 
             }
         }
@@ -57,18 +57,18 @@ struct AudioRoutingView: View {
             let audioInputNode = engine.inputNode
 
             // Set up a tap on the audio input node to process microphone data
-            audioInputNode.installTap(onBus: 0, bufferSize: 128, format: audioInputNode.outputFormat(forBus: 0)) { (buffer, _) in
+            audioInputNode.installTap(onBus: 0, bufferSize: 64, format: audioInputNode.outputFormat(forBus: 0)) { (buffer, _) in
                 // Process the audio buffer to calculate the audio level
-                let floatBuffer = buffer.floatChannelData![0]
-                let bufferLength = UInt32(buffer.frameLength)
-
-                var rms: Float = 0.0
-                vDSP_rmsqv(floatBuffer, 1, &rms, vDSP_Length(bufferLength))
+//                let floatBuffer = buffer.floatChannelData![0]
+//                let bufferLength = UInt32(buffer.frameLength)
+//
+//                var rms: Float = 0.0
+//                vDSP_rmsqv(floatBuffer, 1, &rms, vDSP_Length(bufferLength))
 
                 // Update the audioLevel property on the main thread
-                DispatchQueue.main.async {
-                    audioHandler.audioLevel = rms
-                }
+//                DispatchQueue.main.async {
+//                    audioHandler.audioLevel = rms
+//                }
             }
 
             // Connect the input node to the output node to route audio to headphones
@@ -84,23 +84,23 @@ struct AudioRoutingView: View {
         }
     }
 
-struct AudioMeter: View {
-    @Binding var level: Float // Update the property to a Binding<Float>
-
-    var body: some View {
-        VStack {
-//            Text("Audio Level: \(Int(level * 100))%")
-            RoundedRectangle(cornerRadius: 10)
-                .frame(height: 200)
-                .foregroundColor(.gray)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 10)
-                        .frame( height: CGFloat(level * 200))
-                        .foregroundColor(.green)
-                )
-        }
-    }
-}
+//struct AudioMeter: View {
+//    @Binding var level: Float // Update the property to a Binding<Float>
+//
+//    var body: some View {
+//        VStack {
+////            Text("Audio Level: \(Int(level * 100))%")
+//            RoundedRectangle(cornerRadius: 10)
+//                .frame(height: 200)
+//                .foregroundColor(.gray)
+//                .overlay(
+//                    RoundedRectangle(cornerRadius: 10)
+//                        .frame( height: CGFloat(level * 200))
+//                        .foregroundColor(.green)
+//                )
+//        }
+//    }
+//}
 
 class AudioHandler: ObservableObject {
     @Published var audioLevel: Float = 0.0
