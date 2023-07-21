@@ -57,7 +57,7 @@ struct AudioRoutingView: View {
             let audioInputNode = engine.inputNode
 
             // Set up a tap on the audio input node to process microphone data
-            audioInputNode.installTap(onBus: 0, bufferSize: 1024, format: audioInputNode.outputFormat(forBus: 0)) { (buffer, _) in
+            audioInputNode.installTap(onBus: 0, bufferSize: 128, format: audioInputNode.outputFormat(forBus: 0)) { (buffer, _) in
                 // Process the audio buffer to calculate the audio level
                 let floatBuffer = buffer.floatChannelData![0]
                 let bufferLength = UInt32(buffer.frameLength)
