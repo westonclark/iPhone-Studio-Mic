@@ -1,14 +1,6 @@
-//
-//  ContentView.swift
-//  iPhone Studio Mic
-//
-//  Created by Weston Clark on 7/19/23.
-//
-
 import SwiftUI
 import AVFoundation
 import Accelerate
-//import AVKit
 
 struct ContentView: View {
     var body: some View {
@@ -28,29 +20,35 @@ struct ContentView_Previews: PreviewProvider {
 
 struct AudioRoutingView: View {
     @ObservedObject private var audioHandler = AudioHandler()
-    @State private var isAudioEngineRunning = false // Add a state variable to track the engine's state
+    @State private var audioEngineRunning = false // Updated variable name to follow Swift convention
 
     var body: some View {
-            VStack {
-//                Text("iPhone Studio Mic")
-//                    .font(.title)
-//                    .padding()
-                
-                Button("Start Audio") {
-                    if !isAudioEngineRunning { // Check if the engine is not running
-                        audioHandler.setupAudioSession()
-                        startAudioEngine(engine: audioHandler.engine)
-                        isAudioEngineRunning = true // Set the flag to true when starting the engine
-                    }
+        VStack {
+            Image(systemName: "mic") // Google microphone icon
+                .resizable()
+                .frame(width: 50, height: 60)
+                .foregroundColor(.white) // Set the icon color to white
+                .padding(.bottom, 40)
+            
+            Button(action: {
+                if audioEngineRunning {
+                    stopAudioEngine(engine: audioHandler.engine)
+                    audioEngineRunning = false // Set the flag to false when stopping the engine
+                } else {
+                    audioHandler.setupAudioSession()
+                    startAudioEngine(engine: audioHandler.engine)
+                    audioEngineRunning = true // Set the flag to true when starting the engine
                 }
-                                    .font(.title)
-
-                
-//                AudioMeter(level: $audioHandler.audioLevel) // Pass the binding to AudioMeter
-//                    .padding(25)
-
+            }) {
+                Text(audioEngineRunning ? "Stop Audio" : "Start Audio")
+                    .font(.title)
+                    .foregroundColor(.white) // Set the button text color to white
+                    .padding()
             }
+            .background(audioEngineRunning ? Color.red : Color.green) // Set the button background color based on state
+            .cornerRadius(10)
         }
+    }
 
     private func startAudioEngine(engine: AVAudioEngine) {
             // Create an audio input node to capture microphone data
@@ -58,17 +56,7 @@ struct AudioRoutingView: View {
 
             // Set up a tap on the audio input node to process microphone data
             audioInputNode.installTap(onBus: 0, bufferSize: 64, format: audioInputNode.outputFormat(forBus: 0)) { (buffer, _) in
-                // Process the audio buffer to calculate the audio level
-//                let floatBuffer = buffer.floatChannelData![0]
-//                let bufferLength = UInt32(buffer.frameLength)
-//
-//                var rms: Float = 0.0
-//                vDSP_rmsqv(floatBuffer, 1, &rms, vDSP_Length(bufferLength))
-
-                // Update the audioLevel property on the main thread
-//                DispatchQueue.main.async {
-//                    audioHandler.audioLevel = rms
-//                }
+                
             }
 
             // Connect the input node to the output node to route audio to headphones
@@ -82,28 +70,18 @@ struct AudioRoutingView: View {
                 fatalError("Failed to start the audio engine: \(error)")
             }
         }
+    private func stopAudioEngine(engine: AVAudioEngine) {
+            engine.stop() // Stop the audio engine
+            
+            // Remove the tap on the input node to stop processing microphone data
+            let audioInputNode = engine.inputNode
+            audioInputNode.removeTap(onBus: 0)
+        }
+    
     }
 
-//struct AudioMeter: View {
-//    @Binding var level: Float // Update the property to a Binding<Float>
-//
-//    var body: some View {
-//        VStack {
-////            Text("Audio Level: \(Int(level * 100))%")
-//            RoundedRectangle(cornerRadius: 10)
-//                .frame(height: 200)
-//                .foregroundColor(.gray)
-//                .overlay(
-//                    RoundedRectangle(cornerRadius: 10)
-//                        .frame( height: CGFloat(level * 200))
-//                        .foregroundColor(.green)
-//                )
-//        }
-//    }
-//}
-
 class AudioHandler: ObservableObject {
-    @Published var audioLevel: Float = 0.0
+//    @Published var audioLevel: Float = 0.0
 
     let engine = AVAudioEngine()
     
