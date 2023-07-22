@@ -26,9 +26,9 @@ struct AudioRoutingView: View {
         VStack {
             Image(systemName: "mic") // Google microphone icon
                 .resizable()
-                .frame(width: 50, height: 60)
-                .foregroundColor(.white) // Set the icon color to white
-                .padding(.bottom, 40)
+                .scaledToFit()
+                .frame(width: 60)
+                .padding(.bottom, 60)
             
             Button(action: {
                 if audioEngineRunning {
@@ -55,7 +55,7 @@ struct AudioRoutingView: View {
             let audioInputNode = engine.inputNode
 
             // Set up a tap on the audio input node to process microphone data
-            audioInputNode.installTap(onBus: 0, bufferSize: 64, format: audioInputNode.outputFormat(forBus: 0)) { (buffer, _) in
+            audioInputNode.installTap(onBus: 0, bufferSize: 0, format: audioInputNode.outputFormat(forBus: 0)) { (buffer, _) in
                 
             }
 
@@ -70,6 +70,7 @@ struct AudioRoutingView: View {
                 fatalError("Failed to start the audio engine: \(error)")
             }
         }
+    
     private func stopAudioEngine(engine: AVAudioEngine) {
             engine.stop() // Stop the audio engine
             
@@ -81,14 +82,13 @@ struct AudioRoutingView: View {
     }
 
 class AudioHandler: ObservableObject {
-//    @Published var audioLevel: Float = 0.0
 
     let engine = AVAudioEngine()
     
     func setupAudioSession() {
         let audioSession = AVAudioSession.sharedInstance()
         do {
-            try audioSession.setCategory(.playAndRecord)
+            try audioSession.setCategory(.playAndRecord, mode: .measurement )
             try audioSession.setActive(true)
         } catch {
             fatalError("Failed to configure audio session: \(error)")
