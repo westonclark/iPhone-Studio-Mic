@@ -58,6 +58,7 @@ struct AudioRoutingView: View {
             try session.setPreferredIOBufferDuration(0.0005)
 //            try session.setMode(.measurement)
             try engine.start()
+//            print(session.ioBufferDuration)
         } catch { fatalError("Can't start audio engine") }
     }
     
