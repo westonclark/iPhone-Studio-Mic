@@ -1,12 +1,10 @@
 import SwiftUI
 import AVFoundation
-import Accelerate
 
 struct ContentView: View {
     var body: some View {
         VStack {
             AudioRoutingView()
-                .preferredColorScheme(.dark)
         }
         .padding()
     }
@@ -20,7 +18,7 @@ struct ContentView_Previews: PreviewProvider {
 
 struct AudioRoutingView: View {
     @ObservedObject private var audioHandler = AudioHandler()
-    @State private var audioEngineRunning = false // Updated variable name to follow Swift convention
+    @State private var audioEngineRunning = false
 
     var body: some View {
         VStack {
@@ -29,67 +27,56 @@ struct AudioRoutingView: View {
                 .scaledToFit()
                 .frame(width: 60)
                 .padding(.bottom, 60)
-            
+
             Button(action: {
                 if audioEngineRunning {
                     stopAudioEngine(engine: audioHandler.engine)
-                    audioEngineRunning = false // Set the flag to false when stopping the engine
+                    audioEngineRunning = false
                 } else {
                     audioHandler.setupAudioSession()
                     startAudioEngine(engine: audioHandler.engine)
-                    audioEngineRunning = true // Set the flag to true when starting the engine
+                    audioEngineRunning = true
                 }
             }) {
                 Text(audioEngineRunning ? "Stop Audio" : "Start Audio")
                     .font(.title)
-                    .foregroundColor(.white) // Set the button text color to white
+                    .foregroundColor(.white)
                     .padding()
             }
-            .background(audioEngineRunning ? Color.red : Color.green) // Set the button background color based on state
+            .background(audioEngineRunning ? Color.red : Color.green)
             .cornerRadius(10)
         }
     }
 
     private func startAudioEngine(engine: AVAudioEngine) {
-            // Create an audio input node to capture microphone data
-            let audioInputNode = engine.inputNode
+        engine.inputNode.installTap(onBus: 0, bufferSize: 0, format: engine.inputNode.outputFormat(forBus: 0)) { (buffer, _) in }
+            engine.connect(engine.inputNode, to: engine.outputNode, format: engine.inputNode.outputFormat(forBus: 0))
 
-            // Set up a tap on the audio input node to process microphone data
-            audioInputNode.installTap(onBus: 0, bufferSize: 0, format: audioInputNode.outputFormat(forBus: 0)) { (buffer, _) in
-                
-            }
-
-            // Connect the input node to the output node to route audio to headphones
-            let audioOutputNode = engine.outputNode
-            engine.connect(audioInputNode, to: audioOutputNode, format: audioInputNode.outputFormat(forBus: 0))
-
-            // Start the audio engine
             do {
                 try engine.start()
+                print()
             } catch {
                 fatalError("Failed to start the audio engine: \(error)")
             }
         }
-    
+
     private func stopAudioEngine(engine: AVAudioEngine) {
-            engine.stop() // Stop the audio engine
-            
-            // Remove the tap on the input node to stop processing microphone data
-            let audioInputNode = engine.inputNode
-            audioInputNode.removeTap(onBus: 0)
+            engine.stop()
+            engine.inputNode.removeTap(onBus: 0)
         }
-    
     }
 
 class AudioHandler: ObservableObject {
-
     let engine = AVAudioEngine()
-    
+
     func setupAudioSession() {
         let audioSession = AVAudioSession.sharedInstance()
         do {
-            try audioSession.setCategory(.playAndRecord, mode: .measurement )
+            try audioSession.setCategory(.playAndRecord)
+//            try audioSession.setMode(.measurement)
+            try audioSession.setPreferredIOBufferDuration(0.00005)
             try audioSession.setActive(true)
+            print(audioSession.ioBufferDuration)
         } catch {
             fatalError("Failed to configure audio session: \(error)")
         }
