@@ -49,12 +49,11 @@ struct AudioRoutingView: View {
     }
 
     private func startAudioEngine(engine: AVAudioEngine) {
-        engine.inputNode.installTap(onBus: 0, bufferSize: 0, format: engine.inputNode.outputFormat(forBus: 0)) { (buffer, _) in }
+            engine.inputNode.installTap(onBus: 0, bufferSize: 0, format: engine.inputNode.outputFormat(forBus: 0)) { (buffer, _) in }
             engine.connect(engine.inputNode, to: engine.outputNode, format: engine.inputNode.outputFormat(forBus: 0))
 
             do {
                 try engine.start()
-                print()
             } catch {
                 fatalError("Failed to start the audio engine: \(error)")
             }
