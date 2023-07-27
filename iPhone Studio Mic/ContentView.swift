@@ -76,7 +76,7 @@ class AudioHandler: ObservableObject {
 //            try audioSession.setMode(.measurement)
             try audioSession.setPreferredIOBufferDuration(0.00005)
             try audioSession.setActive(true)
-            print(audioSession.ioBufferDuration)
+//            print(audioSession.ioBufferDuration)
         } catch {
             fatalError("Failed to configure audio session: \(error)")
         }
